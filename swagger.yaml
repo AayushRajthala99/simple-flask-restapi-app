@@ -1,0 +1,520 @@
+openapi: 3.0.3
+info:
+  title: Simple Flask Application API
+  description: A simple REST API for managing items with CRUD operations
+  version: 1.0.0
+  contact:
+    name: API Support
+servers:
+  - url: http://localhost:5000
+    description: Development server
+
+paths:
+  /:
+    get:
+      summary: Home endpoint
+      description: Returns a welcome message with available endpoints
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  endpoints:
+                    type: object
+                    additionalProperties:
+                      type: string
+              example:
+                message: "Simple Flask Application"
+                endpoints:
+                  "GET /": "Get API information"
+                  "HEAD /": "Get headers for home endpoint"
+                  "OPTIONS /": "Get allowed methods for home endpoint"
+                  "GET /items": "Retrieve all items"
+                  "HEAD /items": "Get headers for all items"
+                  "OPTIONS /items": "Get allowed methods for items collection"
+                  "POST /items": "Create a new item"
+                  "GET /items/<id>": "Retrieve a specific item"
+                  "HEAD /items/<id>": "Get headers for a specific item"
+                  "OPTIONS /items/<id>": "Get allowed methods for a specific item"
+                  "PUT /items/<id>": "Update an item"
+                  "PATCH /items/<id>": "Partially update an item"
+                  "DELETE /items/<id>": "Delete an item"
+                  "POST /reset": "Reset Inventory"
+
+    head:
+      summary: Get headers for home endpoint
+      description: Retrieve headers for the home endpoint without the body
+      responses:
+        '200':
+          description: Successful response with headers only
+
+    options:
+      summary: Get allowed methods for home endpoint
+      description: Returns the allowed HTTP methods for the home endpoint
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            Allow:
+              schema:
+                type: string
+              description: Allowed HTTP methods
+              example: "GET, HEAD, OPTIONS"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed_methods:
+                    type: array
+                    items:
+                      type: string
+                  description:
+                    type: string
+              example:
+                allowed_methods: ["GET", "HEAD", "OPTIONS"]
+                description: "Home endpoint - provides API information"
+
+  /items:
+    get:
+      summary: Get all items
+      description: Retrieve a list of all items
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+              examples:
+                empty:
+                  value: []
+                with_items:
+                  value:
+                    - id: 1
+                      name: "Sample Item"
+                      description: "Sample description"
+
+    head:
+      summary: Get headers for all items
+      description: Retrieve headers for the items collection without the body
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Successful response with headers only
+
+    options:
+      summary: Get allowed methods for items collection
+      description: Returns the allowed HTTP methods for the items collection
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            Allow:
+              schema:
+                type: string
+              description: Allowed HTTP methods
+              example: "GET, HEAD, POST, OPTIONS"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed_methods:
+                    type: array
+                    items:
+                      type: string
+              example:
+                allowed_methods: ["GET", "HEAD", "POST", "OPTIONS"]
+
+    post:
+      summary: Create a new item
+      description: Add a new item to the collection
+      tags:
+        - Items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              item:
+                value:
+                  name: "PS5"
+                  description: "Playstation 5 with FC26"
+                  price: 324.99
+                  category: "Clothes"
+      responses:
+        '201':
+          description: Item created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item created"
+                  item:
+                    type: object
+                    additionalProperties: true
+              examples:
+                created:
+                  value:
+                    message: "Item created"
+                    item:
+                      id: 6
+                      name: "PS5"
+                      description: "Playstation 5 with FC26"
+                      price: 324.99
+                      category: "Clothes"
+
+  /items/{item_id}:
+    get:
+      summary: Get a single item
+      description: Retrieve a specific item by its ID (index)
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The index of the item to retrieve
+          schema:
+            type: integer
+            minimum: 0
+          example: 6
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+              examples:
+                item:
+                  value:
+                    name: "Sample Item"
+                    description: "Sample description"
+                    price: 29.99
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Item not found"
+
+    head:
+      summary: Get headers for a specific item
+      description: Retrieve headers for a specific item without the body
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The ID of the item
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Successful response with headers only
+        '404':
+          description: Item not found
+
+    options:
+      summary: Get allowed methods for a specific item
+      description: Returns the allowed HTTP methods for a specific item
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The ID of the item
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      responses:
+        '200':
+          description: Successful response
+          headers:
+            Allow:
+              schema:
+                type: string
+              description: Allowed HTTP methods
+              example: "GET, HEAD, PUT, PATCH, DELETE, OPTIONS"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  allowed_methods:
+                    type: array
+                    items:
+                      type: string
+              example:
+                allowed_methods: ["GET", "HEAD", "PUT", "PATCH", "DELETE", "OPTIONS"]
+
+    put:
+      summary: Update an item
+      description: Update an existing item by its ID (index)
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The index of the item to update
+          schema:
+            type: integer
+            minimum: 0
+          example: 6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              item:
+                value:
+                  name: "Updated Item"
+                  description: "Updated description"
+                  price: 39.99
+      responses:
+        '200':
+          description: Item updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item updated"
+                  item:
+                    type: object
+                    additionalProperties: true
+              examples:
+                updated:
+                  value:
+                    message: "Item updated"
+                    item:
+                      name: "PS5"
+                      description: "Playstation 5 with FC26"
+                      price: 324.99
+                      category: "Electronics"
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Item not found"
+
+    patch:
+      summary: Partially update an item
+      description: Update specific fields of an existing item by its ID (index)
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The index of the item to partially update
+          schema:
+            type: integer
+            minimum: 0
+          example: 6
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+            examples:
+              update_price:
+                value:
+                  price: 424.99
+              update_multiple:
+                value:
+                  price: 45.99
+                  description: "Updated description only"
+      responses:
+        '200':
+          description: Item partially updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item partially updated"
+                  item:
+                    type: object
+                    additionalProperties: true
+              examples:
+                updated:
+                  value:
+                    message: "Item partially updated"
+                    item:
+                      id: 1
+                      name: "Laptop"
+                      description: "Updated description only"
+                      price: 45.99
+                      category: "Electronics"
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Item not found"
+
+    delete:
+      summary: Delete an item
+      description: Remove an item from the collection by its ID (index)
+      tags:
+        - Items
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          description: The index of the item to delete
+          schema:
+            type: integer
+            minimum: 0
+          example: 6
+      responses:
+        '200':
+          description: Item deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Item deleted"
+                  item:
+                    type: object
+                    additionalProperties: true
+              examples:
+                deleted:
+                  value:
+                    message: "Item deleted"
+                    item:
+                      name: "Deleted Item"
+                      description: "This item was deleted"
+        '404':
+          description: Item not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              example:
+                error: "Item not found"
+
+  /reset:
+    post:
+      summary: Reset Inventory
+      description: Resets all items back to the initial default state
+      tags:
+        - Items
+      responses:
+        '200':
+          description: Items successfully reset to default state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Items reset to default state"
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        description:
+                          type: string
+                        price:
+                          type: number
+                        category:
+                          type: string
+              example:
+                message: "Items reset to default state"
+                items:
+                  - id: 1
+                    name: "Laptop"
+                    description: "High-performance laptop for programming"
+                    price: 1299.99
+                    category: "Electronics"
+                  - id: 2
+                    name: "Wireless Mouse"
+                    description: "Ergonomic wireless mouse with USB receiver"
+                    price: 29.99
+                    category: "Electronics"
+                  - id: 3
+                    name: "Desk Chair"
+                    description: "Comfortable office chair with lumbar support"
+                    price: 249.99
+                    category: "Furniture"
+                  - id: 4
+                    name: "Coffee Mug"
+                    description: "Ceramic mug with 'World's Best Developer' text"
+                    price: 12.99
+                    category: "Kitchen"
+                  - id: 5
+                    name: "Notebook"
+                    description: "100-page ruled notebook for notes and sketches"
+                    price: 5.99
+                    category: "Stationery"
+
+tags:
+  - name: Items
+    description: Operations related to item management
